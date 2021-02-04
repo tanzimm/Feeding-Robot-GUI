@@ -14,6 +14,7 @@ import {
   View,
   Text,
   StatusBar,
+  TouchableOpacity,
   Image,
 } from 'react-native';
 
@@ -25,16 +26,26 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import {Dimensions} from 'react-native';
 
 const App: () => React$Node = () => {
+
+  
+
   return (
     <View style={styles.container3}>
       <Image style={styles.container} source={require('./assets/1.jpg')} />
-      <Image style={styles.container2} source={require('./assets/2.jpg')} />
+      <Image style={styles.container2} source={require('./assets/2.jpg')}  onTouchStart={(e) => {console.log('touchMove',e.nativeEvent.locationX,e.nativeEvent.locationY)}}/>
+     
+         
+      <View style={styles.container4}>
+        <Text style={{fontSize:20}}>{'     hello user, welcome to the feeding robot'}</Text>
+      </View>
     </View>
   );
 };
+
+
+
 
 // const App: () => React$Node = () => {
 //   return (
@@ -91,6 +102,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 140,
     left: 100,
+    borderRadius: 5,
   },
   container2: {
     width: 640,
@@ -98,11 +110,23 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 140,
     left: 800,
+    borderRadius: 5,
   },
 
   container3: {
     width: 4000,
     height: 4000,
+    backgroundColor: Colors.white,
+  },
+
+  container4: {
+    width: 500,
+    height: 40,
+    backgroundColor: Colors.white,
+    position: 'absolute',
+    top: 650,
+    left: 500,
+    borderRadius: 5,
   },
 
   scrollView: {
@@ -113,7 +137,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   body: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.black,
   },
   sectionContainer: {
     marginTop: 32,
