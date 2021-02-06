@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -16,6 +16,7 @@ import {
   StatusBar,
   TouchableOpacity,
   Image,
+  Dimensions,
 } from 'react-native';
 
 import {
@@ -26,26 +27,34 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+const w = Dimensions.get('window').width;
+const h = Dimensions.get('window').height;
 
+//function App (){
 const App: () => React$Node = () => {
+  const [msg, updateMsg] = useState('hello user');
 
-  
+  function printXY(evt) {
+    let xy = String(Math.round(evt.nativeEvent.locationX)) + ' ' + String(Math.round(evt.nativeEvent.locationY));
+    //let s = String(w) + ' ' + String(h)
+    updateMsg(xy);
+  }
 
   return (
-    <View style={styles.container3}>
-      <Image style={styles.container} source={require('./assets/1.jpg')} />
-      <Image style={styles.container2} source={require('./assets/2.jpg')}  onTouchStart={(e) => {console.log('touchMove',e.nativeEvent.locationX,e.nativeEvent.locationY)}}/>
-     
-         
-      <View style={styles.container4}>
-        <Text style={{fontSize:20}}>{'     hello user, welcome to the feeding robot'}</Text>
+    <View style={styles.overall_screen}>
+      <Image style={styles.face_cam} source={require('./assets/1.jpg')} />
+      <Image
+        style={styles.food_cam}
+        source={require('./assets/2.jpg')}
+        onTouchStart={evt => printXY(evt)}
+      />
+
+      <View style={styles.text_prompt}>
+        <Text style={{fontSize: 20}}>{msg}</Text>
       </View>
     </View>
   );
 };
-
-
-
 
 // const App: () => React$Node = () => {
 //   return (
@@ -96,36 +105,36 @@ const App: () => React$Node = () => {
 // };
 
 const styles = StyleSheet.create({
-  container: {
+  face_cam: {
     width: 640,
     height: 480,
     position: 'absolute',
-    top: 140,
-    left: 100,
+    top: h*0.15, //140
+    left: w*0.06, //100
     borderRadius: 5,
   },
-  container2: {
+  food_cam: {
     width: 640,
     height: 480,
     position: 'absolute',
-    top: 140,
-    left: 800,
+    top: h*0.15, //140
+    left: w*.51, //800
     borderRadius: 5,
   },
 
-  container3: {
-    width: 4000,
-    height: 4000,
+  overall_screen: {
+    width: w,
+    height: h,
     backgroundColor: Colors.white,
   },
 
-  container4: {
+  text_prompt: {
     width: 500,
     height: 40,
     backgroundColor: Colors.white,
     position: 'absolute',
-    top: 650,
-    left: 500,
+    top: h*.8, // 650
+    left: w*.35, // 500
     borderRadius: 5,
   },
 
