@@ -4,9 +4,10 @@
  *
  * @format
  * @flow strict-local
+ * npx react-native run-windows
  */
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -30,14 +31,30 @@ import {
 const w = Dimensions.get('window').width;
 const h = Dimensions.get('window').height;
 
+//var x2 = 100
+
 //function App (){
 const App: () => React$Node = () => {
   const [msg, updateMsg] = useState('hello user');
+  const [w,updateX] = useState(0)
 
   function printXY(evt) {
     let xy = String(Math.round(evt.nativeEvent.locationX)) + ' ' + String(Math.round(evt.nativeEvent.locationY));
     //let s = String(w) + ' ' + String(h)
     updateMsg(xy);
+    updateX(Math.round(evt.nativeEvent.locationX))
+  }
+
+   function bboxStyle() {
+    return {
+          width: 100,
+          height: 100,
+          position: 'absolute',
+          top: 0,
+          left: w,
+          borderWidth: 2,
+          borderColor: Colors.black,
+           }
   }
 
   return (
@@ -47,78 +64,46 @@ const App: () => React$Node = () => {
         style={styles.food_cam}
         source={require('./assets/2.jpg')}
         onTouchStart={evt => printXY(evt)}
-      />
+      > 
+      </Image> 
 
       <View style={styles.text_prompt}>
-        <Text style={{fontSize: 20}}>{msg}</Text>
+        <Text style={{ fontSize: 20 }}>{msg}</Text>
+      </View>
+      <View style = {bboxStyle()} >
+
       </View>
     </View>
   );
 };
 
-// const App: () => React$Node = () => {
-//   return (
-//     <>
-//       <StatusBar barStyle="dark-content" />
-//       <SafeAreaView>
-//         <ScrollView
-//           contentInsetAdjustmentBehavior="automatic"
-//           style={styles.scrollView}>
-//           <Header />
-//           {global.HermesInternal == null ? null : (
-//             <View style={styles.engine}>
-//               <Text style={styles.footer}>Engine: Hermes</Text>
-//             </View>
-//           )}
-//           <View style={styles.body}>
-//             <View style={styles.sectionContainer}>
-//               <Text style={styles.sectionTitle}>Step One</Text>
-//               <Text style={styles.sectionDescription}>
-//                 Edit <Text style={styles.highlight}>App.js</Text> to change this
-//                 HELLLLfff
-//               </Text>
-//             </View>
-//             <View style={styles.sectionContainer}>
-//               <Text style={styles.sectionTitle}>HELLLLLLLO</Text>
-//               <Text style={styles.sectionDescription}>
-//                 <ReloadInstructions />
-//               </Text>
-//             </View>
-//             <View style={styles.sectionContainer}>
-//               <Text style={styles.sectionTitle}>Debug</Text>
-//               <Text style={styles.sectionDescription}>
-//                 <DebugInstructions />
-//               </Text>
-//             </View>
-//             <View style={styles.sectionContainer}>
-//               <Text style={styles.sectionTitle}>Learn More</Text>
-//               <Text style={styles.sectionDescription}>
-//                 YEOOOOOOOOOOOOOO
-//               </Text>
-//             </View>
-//             <LearnMoreLinks />
-//           </View>
-//         </ScrollView>
-//       </SafeAreaView>
-//     </>
-//   );
-// };
+//style= {{position: 'absolute', left: 0, top: 0, width: 100, height:100, borderWidth:5, borderColor: Colors.black}}
 
 const styles = StyleSheet.create({
+
+  bbox: {
+    width: 100,
+    height: 100,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    borderWidth: 5,
+    borderColor: Colors.black,
+  },
   face_cam: {
     width: 640,
     height: 480,
     position: 'absolute',
-    top: h*0.15, //140
-    left: w*0.06, //100
+    top: h * 0.15, //140
+    left: w * 0.06, //100
     borderRadius: 5,
   },
   food_cam: {
     width: 640,
     height: 480,
     position: 'absolute',
-    top: h*0.15, //140
-    left: w*.51, //800
+    top: h * 0.15, //140
+    left: w * .51, //800
     borderRadius: 5,
   },
 
@@ -126,6 +111,7 @@ const styles = StyleSheet.create({
     width: w,
     height: h,
     backgroundColor: Colors.white,
+    position: 'relative',
   },
 
   text_prompt: {
@@ -133,8 +119,8 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: Colors.white,
     position: 'absolute',
-    top: h*.8, // 650
-    left: w*.35, // 500
+    top: h * .8, // 650
+    left: w * .35, // 500
     borderRadius: 5,
   },
 
