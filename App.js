@@ -34,10 +34,14 @@ const h = Dimensions.get('window').height;
 const food_cam_pos = [(w * .51),(h * 0.15)];
 const face_cam_pos = [(w * 0.06),(h * 0.15)];
 
-var x = 0 
-var y = 0
-var prev_x = 0
-var prev_y = 0
+
+var bbox_x = 0 
+var bbox_y = 0
+var bbox_w = 0
+var bbox_h = 0
+var aqc_mode = -1
+
+
 
 
 
@@ -48,58 +52,49 @@ const App: () => React$Node = () => {
   const [bbox_btn_color, updateColor1] = useState("#00cc00")
   const [bbox_color, updateColor2] = useState(Colors.black)
   const [adj_color,updateColor3] = useState(Colors.black)
+  
+  const [pick_acq,updatePick] = useState(false)
+  const [ask_q,updateQ] = useState(false)
+  const [ask_done,updateDone] = useState(false)
+ 
 
   function getXY(evt) {
     if (draw == true) {
       updateColor2("#00cc00")
-      x =  Math.round(evt.nativeEvent.locationX)
-      y =  Math.round(evt.nativeEvent.locationY)   
-      prev_x = x
-      prev_y = y   
+      bbox_x =  Math.round(evt.nativeEvent.locationX)
+      bbox_y =  Math.round(evt.nativeEvent.locationY)   
     }
 
-    else {
+    else if ( draw == false && pick_acq == false) {
       let xy = String(Math.round(evt.nativeEvent.locationX)) + ' ' + String(Math.round(evt.nativeEvent.locationY))
       updateMsg(xy)
+      ask_question("is it correct?",1)
+     
     }
   }
   function draw_bbox(evt){
+    
     if (draw == true){
-  
       let x2 = Math.round(evt.nativeEvent.locationX)
       let y2 = Math.round(evt.nativeEvent.locationY)
 
-
-
-      let roc_x = x2 - prev_x
-      let roc_y = y2 - prev_y 
-
-
-      let xy = String(roc_x) + " " + String(roc_y)
-
-      prev_x = x2
-      prev_y = y2
-
-   
-      let bb_w = (x2 - (x))
-      let bb_h = (y2  - (y))
-      //let xy = String(x2) + " " + String(y2) + " " + String(bb_w) + " " + String(bb_h)  
-     
-      updateBbox([bb_w,bb_h,x+food_cam_pos[0],y+food_cam_pos[1]])
+      bbox_w = (x2 - (bbox_x))
+      bbox_h = (y2  - (bbox_y))
+      //let xy = String(x2) + " " + String(y2) + " " + String(bb_w) + " " + String(bb_h) 
+    
+      updateBbox([bbox_w,bbox_h,bbox_x+food_cam_pos[0],bbox_y+food_cam_pos[1]])
       updateColor3("#ff3300")
-
-          
       
-      
-      
-      
-      updateMsg(xy)
     }
 
   }
 
   function enable_Bbox() {
     //turning draw button on
+    if (pick_acq == true){
+      return
+    }
+
     if (draw == false) {
       updateColor1("#ff3300")
       updateDraw(true)
@@ -109,67 +104,99 @@ const App: () => React$Node = () => {
     else {
       updateColor1("#00cc00")
       updateDraw(false)
-      updateBbox([0,0,0,0])
-      updateColor2(Colors.black)
-      updateColor3(Colors.black)
-    }
-
-
-  }
+      hide_bbox()
+      
   
+    }
 
-  function bboxStyle() {
-    return {
-      position: 'absolute',
-      width: bb[0],
-      height: bb[1],
-      left: bb[2], //(w * .51) + bb[2],
-      top: bb[3],//(h * 0.15) + bb[3],
-      borderWidth: 3,
-      borderColor: bbox_color,//"#00cc00",
+  }
+  function hide_bbox(){
+    updateBbox([0,0,0,0])
+    updateColor2(Colors.black)
+    updateColor3(Colors.black)
+  }
+
+  function add_bbox(){
+
+    if (draw == true){
+
+      if( bbox_w == 0 || bbox_h == 0){
+
+        updateMsg("no bounding box created")
+        return
+      }
+
+      let bbox = String(bbox_x) + "," + String(bbox_y) + "," + String(bbox_w) + "," + String(bbox_h)
+      updateDraw(false)
+      //updateMsg("How should I feel you this food?")
+      updateMsg(bbox)
+      updatePick(true)
+    }
+
+  }
+
+  function choose_acq_mode(mode){
+    
+      if (pick_acq == true){
+        aqc_mode = mode
+        updateMsg(aqc_mode)
+        updatePick(false)
+        updateColor1("#00cc00")
+        hide_bbox()
+        
+        bbox_x = 0 
+        bbox_y = 0
+        bbox_w = 0
+        bbox_h = 0
+        aqc_mode = -1
+      }
+  }
+
+  function ask_question(q,selection){
+    
+    if (selection == 0){
+      updateMsg(q)
+      updateQ(true)
+    }
+
+    else if (selection == 1){
+      updateMsg("Are you done")
+      updateDone(true)
+    }
+       
+  }
+
+  function choose_yn(answer){
+    if (ask_q == true) {
+      updateMsg(answer)
+      updateQ(false)
+
     }
   }
 
-  function bboxBtn_style() {
-    return {
-      width: 50,
-      height: 50,
-      position: 'absolute',
-      top: food_cam_pos[1] - 55,
-      left: food_cam_pos[0],
-      borderRadius: 50,
-      justifyContent: 'center',
-      backgroundColor: bbox_btn_color,
-      justifyContent: 'center',
-      alignItems: 'center',
+  function choose_done(){
+    if (ask_done == true){
+      updateMsg("done")
+      updateDone(false)
+     
     }
   }
 
-  function adjust_point_style(p1,p2){
-    return{
-      position:'absolute',
-      left: p1, //(-6,-10), (100,-10), (-4,100), (100,100)
-      top: p2,
-      width: 15,
-      height: 15,
-      borderRadius: 15,
-      backgroundColor: adj_color,
-
-    }
-  }
 
   function test(evt){
     
     let x2 = Math.round(evt.nativeEvent.locationX)
     let y2 = Math.round(evt.nativeEvent.locationY)
-    let xy = String(x2) + " " + String(y)
-    updateMsg(xy)
+    let xy = String(x2) + " " + String(y2)
+    updateMsg("bitch")
 
     
   }
 
   return (
     <View style={styles.overall_screen}>
+
+      {/* camera feeds */}
       <Image style={styles.face_cam} source={require('./assets/1.jpg')} />
       <Image
         style={styles.food_cam}
@@ -177,40 +204,133 @@ const App: () => React$Node = () => {
         onTouchStart={evt => getXY(evt)}
         onTouchMove = {evt => draw_bbox(evt)}
         onTouchEnd = {evt => draw_bbox(evt)}
-         />
+      />
 
+      {/* text prompt area */}
       <View style={styles.text_prompt}>
         <Text style={{ fontSize: 20 }}>{msg}</Text>
       </View>
-      <View style={bboxStyle()} >
-        <View style = {adjust_point_style(-15,-12)}/>
-        <View style = {adjust_point_style("100%",-12)}/>
-        <View style = {adjust_point_style(-10,"100%")}/>
-        <View style = {adjust_point_style("100%","100%")}/>
-      </View>
-      <View style={bboxBtn_style()} onTouchStart={evt => enable_Bbox()} >
-        <Text style={{ fontSize: 30, fontWeight: 'bold' }} >+</Text>
 
+      {/* bounding box */}
+      { draw == true && 
+      (<View style={bboxStyle(bb,bbox_color)} >
+        <View style = {adjust_point_style(-15,-12,adj_color)} onTouchStart={evt => test(evt)} />
+        <View style = {adjust_point_style("100%",-12,adj_color)}/>
+        <View style = {adjust_point_style(-10,"100%",adj_color)}/>
+        <View style = {adjust_point_style("100%","100%",adj_color)}/>
+      </View>)}
+
+      <View style={topBtn_style(food_cam_pos,bbox_btn_color,0,-55)} onTouchStart={evt => enable_Bbox()} >
+        <Text style={{ fontSize: 30, fontWeight: 'bold' }} >+</Text>
       </View>
+
+      { draw == true && 
+      (<View style={topBtn_style(food_cam_pos,"#00cc00", +55,-55)} onTouchStart = {evt => add_bbox()}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }} >Add</Text>
+      </View>)}
+
+       {/* acqusition mode buttons */}
+       {/* "#99ff33","#9933ff","#0099cc","#ff3300" */}
+      {pick_acq == true && 
+      (<View style= {bottomBtn_style(0,"#99ff33")} onTouchStart = {evt => choose_acq_mode(1)}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }} >Fork</Text>
+      </View>)}
+
+      {pick_acq == true &&
+      (<View style= {bottomBtn_style(120,"#9933ff")} onTouchStart = {evt => choose_acq_mode(2)}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }} >Spoon</Text>
+      </View>)}
+      
+      {pick_acq == true &&
+      (<View style= {bottomBtn_style(240,"#0099cc")} onTouchStart = {evt => choose_acq_mode(3)}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }} >Grab</Text>
+      </View>)}
+      
+      {pick_acq == true &&
+      (<View style= {bottomBtn_style(360,"#ff3300")} onTouchStart = {evt => choose_acq_mode(0)}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }} >None</Text>
+      </View>)}
+
+
+      {/* yes/no and done buttons */}
+      {ask_q == true &&
+      (<View style= {bottomBtn_style(120,"#00cc00")} onTouchStart = {evt => choose_yn(1)}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }} >Yes</Text>
+      </View>)}
+      
+      {ask_q == true &&
+      (<View style= {bottomBtn_style(240,"#ff3300")} onTouchStart = {evt => choose_yn(0)}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }} >No</Text>
+      </View>)}
+      
+      {ask_done == true &&
+      (<View style= {bottomBtn_style(180,"#3366ff")} onTouchStart = {evt => choose_done()}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }} >Done</Text>
+      </View>)}
+
+
 
     </View>
   );
 };
+function bottomBtn_style(x,color){
+  return{
+    width: 100,
+    height: 40,
+    position: 'absolute',
+    top: (h * .85), // 650
+    left: (w * .35) + x,
+    borderRadius:20,
+    justifyContent: 'center',
+    backgroundColor: color, //"#ff3300",
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+}
 
-//style= {{position: 'absolute', left: 0, top: 0, width: 100, height:100, borderWidth:5, borderColor: Colors.black}}
+function bboxStyle(bb,bbox_color) {
+  return {
+    position: 'absolute',
+    left: bb[2], //(w * .51), //+ bb[2],
+    top: bb[3],//(h * 0.15) + bb[3],
+    width: bb[0],
+    height: bb[1],
+    borderWidth: 3,
+    borderColor: bbox_color,//"#00cc00",
+  }
+}
+
+function topBtn_style(food_cam_pos,color,x,y) {
+  return {
+    width: 50,
+    height: 50,
+    position: 'absolute',
+    top: food_cam_pos[1] + y, //-55
+    left: food_cam_pos[0] + x,
+    borderRadius: 50,
+    justifyContent: 'center',
+    backgroundColor: color,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+}
+
+function adjust_point_style(p1,p2, adj_color){
+  return{
+    position:'absolute',
+    left: p1, //(-6,-10), (100,-10), (-4,100), (100,100)
+    top: p2,
+    width: 15,
+    height: 15,
+    borderRadius: 15,
+    backgroundColor: adj_color,
+
+  }
+}
+
+
 
 const styles = StyleSheet.create({
-
-  adjust_point: {
-    position:'absolute',
-    left: '-4%', //(-6,-10), (100,-10), (-4,100), (100,100)
-    top: '100%',
-    width: 10,
-    height: 10,
-    borderRadius: 10,
-    backgroundColor: "#ff3300",
-
-  },
 
   bbox: {
     width: 100,
@@ -245,17 +365,13 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
 
-  bbox_btn: {
-
-
-  },
 
   text_prompt: {
     width: 500,
     height: 40,
     backgroundColor: Colors.white,
     position: 'absolute',
-    top: h * .8, // 650
+    top: h * .78, // 650
     left: w * .35, // 500
     borderRadius: 5,
   },
