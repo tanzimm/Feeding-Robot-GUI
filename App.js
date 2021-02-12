@@ -42,9 +42,6 @@ var bbox_h = 0
 var aqc_mode = -1
 
 
-
-
-
 const App: () => React$Node = () => {
   const [msg, updateMsg] = useState('hello user');
   const [bb, updateBbox] = useState([0, 0, 0, 0])
@@ -68,7 +65,7 @@ const App: () => React$Node = () => {
     else if ( draw == false && pick_acq == false) {
       let xy = String(Math.round(evt.nativeEvent.locationX)) + ' ' + String(Math.round(evt.nativeEvent.locationY))
       updateMsg(xy)
-      ask_question("is it correct?",1)
+     // ask_question("is it correct?",1)
      
     }
   }
@@ -78,15 +75,25 @@ const App: () => React$Node = () => {
       let x2 = Math.round(evt.nativeEvent.locationX)
       let y2 = Math.round(evt.nativeEvent.locationY)
 
+      if ((x2 <= 15) && (y2 <= 15))
+      {
+        return
+      }
+
+      x2 = Math.max(0,x2)
+      y2 = Math.max(0,y2)
+
+      x2 = Math.min(640,x2)
+      y2 = Math.min(480,y2)
+
       bbox_w = (x2 - (bbox_x))
       bbox_h = (y2  - (bbox_y))
-      //let xy = String(x2) + " " + String(y2) + " " + String(bb_w) + " " + String(bb_h) 
-    
+      let xy = String(bbox_x) + " " + String(bbox_y) + " " + String(bbox_x+bbox_w) + " " + String(bbox_y+bbox_h) 
+     
       updateBbox([bbox_w,bbox_h,bbox_x+food_cam_pos[0],bbox_y+food_cam_pos[1]])
-      updateColor3("#ff3300")
-      
+      updateColor3("#ff3300")  
+      updateMsg(xy)
     }
-
   }
 
   function enable_Bbox() {
@@ -105,8 +112,6 @@ const App: () => React$Node = () => {
       updateColor1("#00cc00")
       updateDraw(false)
       hide_bbox()
-      
-  
     }
 
   }
@@ -182,6 +187,52 @@ const App: () => React$Node = () => {
     }
   }
 
+  function adjust_point(evt,p){
+
+    let x2 = Math.round(evt.nativeEvent.locationX)
+    let y2 = Math.round(evt.nativeEvent.locationY)
+
+    // if ((x2 <= 15) && (y2 <= 15))
+    // {
+    //     return
+    // }
+
+    x2 = Math.max(0,x2)
+    y2 = Math.max(0,y2)
+
+    x2 = Math.min(640,x2)
+    y2 = Math.min(480,y2)
+  
+    if (p == 1){
+      bbox_w = (bbox_x + bbox_w) - x2
+      bbox_h = (bbox_y + bbox_h) - y2
+      bbox_x = x2
+      bbox_y = y2
+      //let xy = String(x2) + " " + String(y2) + " " + String(bb_w) + " " + String(bb_h) 
+    }
+    else if (p == 2){
+      bbox_w = x2 - (bbox_x) 
+      bbox_h = (bbox_y + bbox_h) - y2
+      bbox_x = x2 - bbox_w
+      bbox_y = y2
+    }
+    else if( p == 3){
+      bbox_w = (bbox_x+bbox_w) - x2
+      bbox_h = y2 - bbox_y
+      bbox_x = x2
+      bbox_y = y2 - bbox_h
+    }
+    else if( p == 4){
+      bbox_w = x2 - bbox_x
+      bbox_h = y2 - bbox_y
+      bbox_x = x2 - bbox_w
+      bbox_y = y2 - bbox_h
+    }
+
+    updateBbox([bbox_w,bbox_h,bbox_x+food_cam_pos[0],bbox_y+food_cam_pos[1]])
+    updateColor3("#ff3300")
+
+  }
 
   function test(evt){
     
@@ -214,10 +265,10 @@ const App: () => React$Node = () => {
       {/* bounding box */}
       { draw == true && 
       (<View style={bboxStyle(bb,bbox_color)} >
-        <View style = {adjust_point_style(-15,-12,adj_color)} onTouchStart={evt => test(evt)} />
-        <View style = {adjust_point_style("100%",-12,adj_color)}/>
-        <View style = {adjust_point_style(-10,"100%",adj_color)}/>
-        <View style = {adjust_point_style("100%","100%",adj_color)}/>
+        <View style = {adjust_point_style(-15,-12,adj_color)} onTouchEnd = {evt => adjust_point(evt,1)} />
+        <View style = {adjust_point_style("100%",-12,adj_color)} onTouchEnd = {evt => adjust_point(evt,2)}/>
+        <View style = {adjust_point_style(-10,"100%",adj_color)} onTouchEnd = {evt => adjust_point(evt,3)}/>
+        <View style = {adjust_point_style("100%","100%",adj_color)} onTouchEnd = {evt => adjust_point(evt,4)}/>
       </View>)}
 
       <View style={topBtn_style(food_cam_pos,bbox_btn_color,0,-55)} onTouchStart={evt => enable_Bbox()} >
@@ -273,6 +324,7 @@ const App: () => React$Node = () => {
     </View>
   );
 };
+
 function bottomBtn_style(x,color){
   return{
     width: 100,
@@ -329,7 +381,6 @@ function adjust_point_style(p1,p2, adj_color){
 }
 
 
-
 const styles = StyleSheet.create({
 
   bbox: {
@@ -376,42 +427,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.black,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
 });
 
 export default App;
