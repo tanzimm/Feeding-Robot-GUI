@@ -1,1 +1,0 @@
-A Windows Application for a robotic feeding system GUI with a Flask backend
