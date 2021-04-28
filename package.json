@@ -6,6 +6,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
+    "start-api": "flask run --no-debugger",
     "test": "jest",
     "lint": "eslint ."
   },
@@ -26,5 +27,6 @@
   },
   "jest": {
     "preset": "react-native"
-  }
+  },
+  "proxy:": "http://127.0.0.1:5000/"
 }
